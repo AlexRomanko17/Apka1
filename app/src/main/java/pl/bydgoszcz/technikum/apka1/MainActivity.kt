@@ -40,8 +40,9 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun SwitchesPrank(modifier: Modifier = Modifier) {
-        var switchesState by remember { mutableStateOf(List(5) { false }) }
+        var switchesState by remember { mutableStateOf(List(10) { false }) }
         var switchCount by remember { mutableIntStateOf(0) }
+        var totalPresses by remember { mutableIntStateOf(0) }
 
         val message = when (switchCount) {
             in 0..9 -> "turn all on"
@@ -53,30 +54,64 @@ class MainActivity : ComponentActivity() {
 
         Column(modifier = modifier.padding(16.dp)) {
             Text(text = message, modifier = Modifier.padding(bottom = 16.dp))
-            switchesState.forEachIndexed { index, isChecked ->
-                Switch(
-                    checked = isChecked,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            val newState = switchesState.toMutableList()
-                            newState[index] = true
-                            if (newState.all { it }) {
-                                val randomIndex = Random.nextInt(5)
-                                newState[randomIndex] = false
-                            }
-                            switchesState = newState
-                            switchCount++
-                        } else {
-                            switchesState = switchesState.toMutableList().apply { this[index] = false }
-                            switchCount--
-                        }
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.primary
-                    ),
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+            Row {
+                Column(modifier = Modifier.weight(1f)) {
+                    switchesState.subList(0, 5).forEachIndexed { index, isChecked ->
+                        Switch(
+                            checked = isChecked,
+                            onCheckedChange = { checked ->
+                                val newState = switchesState.toMutableList()
+                                newState[index] = checked
+                                if (checked) {
+                                    switchCount++
+                                    totalPresses++
+                                    if (newState.all { it }) {
+                                        val randomIndex = Random.nextInt(10)
+                                        newState[randomIndex] = false
+                                        switchCount--
+                                    }
+                                } else {
+                                    switchCount--
+                                }
+                                switchesState = newState
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.primary
+                            ),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    switchesState.subList(5, 10).forEachIndexed { index, isChecked ->
+                        Switch(
+                            checked = isChecked,
+                            onCheckedChange = { checked ->
+                                val newState = switchesState.toMutableList()
+                                newState[index + 5] = checked
+                                if (checked) {
+                                    switchCount++
+                                    totalPresses++
+                                    if (newState.all { it }) {
+                                        val randomIndex = Random.nextInt(10)
+                                        newState[randomIndex] = false
+                                        switchCount--
+                                    }
+                                } else {
+                                    switchCount--
+                                }
+                                switchesState = newState
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = MaterialTheme.colorScheme.primary
+                            ),
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                }
             }
+            Text(text = "Number of presses: $switchCount", modifier = Modifier.padding(top = 16.dp))
+            Text(text = "Total presses: $totalPresses", modifier = Modifier.padding(top = 8.dp))
             if (switchCount >= 40) {
                 Image(
                     painter = painterResource(id = R.drawable.crazy),
